@@ -5,10 +5,12 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 7878;
 
-const signUp = require('./routes/signup')
-
 app.use(express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname,'views')));
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(express.json());
+
+const signUp = require('./routes/signup')
 
 app.use('/',signUp);
 

@@ -14,6 +14,16 @@
      <main id="signup-box">
        <form id="signup-form">
            <h3>Signup</h3>
+
+           <p id="user-exists">
+              User already exists! Please login.
+           </p>
+           <p id="user-created">
+            User created successfully! Please login.
+           </p>
+           <p id="uncaught-error">
+            An error occurred. Please try again.
+           </p>
            <p>
                <label for="name">
                    Name:
@@ -39,14 +49,14 @@
                <input type="password" id="password" name="uPassword" placeholder="create password">
            </p>
                <p>
-                   <button>Submit & Signup</button>
+                   <button type="submit">Submit & Signup</button>
                </p>
        </form>
    </main>
      <footer id="foot">
-       <h4>Buddy-Chat &copy;2024</h4>
+       <h4>Buddy-Chat&copy;2024</h4>
      </footer>
     </div>
- 
+<script src="signup.js"></script>
 </body>
 </html>
