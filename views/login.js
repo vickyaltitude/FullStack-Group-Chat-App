@@ -65,6 +65,7 @@ function displayMessage(text) {
      success.style.display = 'block'
      setTimeout(() => {
         success.style.display = 'none'
+        window.location.href = 'http://localhost:7878/chathome';
      }, 3000);
     }
     

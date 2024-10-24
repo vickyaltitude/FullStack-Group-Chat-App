@@ -19,11 +19,14 @@ app.use(cors({
 
 const signUp = require('./routes/signup');
 const logIn = require('./routes/login')
+const chatHome = require('./routes/chathome');
 
 
 app.use('/',signUp);
 
 app.use('/login',logIn);
+
+app.use('/chathome',chatHome);
 
 
 
