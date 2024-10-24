@@ -3,6 +3,7 @@ const router = express.Router();
 const path = require('path');
 const bcrypt = require('bcrypt');
 const db = require('../models/data');
+const generatedToken = require('../util/jwt');
 
 
 router.get('/',(req,res)=>{
@@ -19,7 +20,7 @@ router.post('/',(req,res)=>{
         let dataFromDB = resp[0]
           console.log(resp[0])
           if(dataFromDB.length == 0){
-            res.status(401).json({msg:'user email not found'})
+            res.status(404).json({msg:'user email not found'})
           }else if(dataFromDB.length){
             bcrypt.compare(userPassword,dataFromDB[0].password,(err,result)=>{
 
@@ -28,7 +29,7 @@ router.post('/',(req,res)=>{
                     console.log('error')
                 }else if(result == true){
                     console.log('success')
-                    res.status(200).json({msg:'user login successfull'})
+                    res.status(200).json({msg:'user login successfull',userId: generatedToken.encryptuserid(dataFromDB[0].id,dataFromDB[0].name)})
                 }else{
                     console.log('errormsg')
                     res.status(401).json({msg:'entered password is incorrect'})

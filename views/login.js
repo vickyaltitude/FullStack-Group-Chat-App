@@ -15,10 +15,12 @@ logInForm.addEventListener('submit',async(e)=>{
           })
 
           let parsedResponse = await loginCheck.json();
+          console.log(parsedResponse.userId)
 
           if(loginCheck.status){
              
              console.log(parsedResponse.msg)
+             localStorage.setItem('userId',parsedResponse.userId);
              displayMessage(parsedResponse.msg)
             
           }else if(!loginCheck.status){
