@@ -18,9 +18,12 @@ app.use(cors({
 }));
 
 const signUp = require('./routes/signup');
+const logIn = require('./routes/login')
 
 
 app.use('/',signUp);
+
+app.use('/login',logIn);
 
 
 

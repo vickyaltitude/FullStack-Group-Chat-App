@@ -34,7 +34,7 @@ body{
     align-items: center;
 }
 
-#signup-box{
+#login-box{
     background: #F5F5F5; /* White Smoke */
     color: #333333; 
     width: 100%;
@@ -46,7 +46,7 @@ body{
     align-items: center;
   
 }
-#signup-form{
+#login-form{
     height: 90%;
     width: 100%;
     display: flex;
@@ -91,21 +91,10 @@ button:hover{
     align-items: center;
 }
 
-#user-exists{
-  font-size: 1.4rem;
-  color: red;
-  display: none;
-}
-#user-created{
+#login-success{
     font-size: 1.4rem;
     color: green;
     display: none;
-}
-
-#uncaught-error{
-    font-size: 1.4rem;
-  color: red;
-  display: none;
 }
 a{
     color: #333333;
@@ -116,11 +105,17 @@ a{
 .submits{
     text-align: center;
 }
+
 a:hover{
     color: #33333395;
    
 }
 
+#uncaught-error,#password-error,#email-error{
+    font-size: 1.4rem;
+  color: red;
+  display: none;
+}
 @media (max-width: 600px) {
    
 
