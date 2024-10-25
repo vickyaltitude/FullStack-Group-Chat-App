@@ -1,5 +1,4 @@
 const signupForm = document.getElementById('signup-form');
-console.log('javascript')
 
 signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -45,6 +44,7 @@ function displayMessage(text) {
     success.style.display = 'block'
     setTimeout(() => {
        success.style.display = 'none'
+       window.location.href = 'http://localhost:7878/login';
     }, 3000);
 
    }

@@ -6,29 +6,20 @@ const bcrypt = require('bcrypt');
 const db = require('../models/data');
 require('dotenv').config();
 
-
 router.get('/',(req,res)=>{
-    res.sendFile(path.join(__dirname,'..','public','chathome.html'))
-})
 
-
-router.post('/',(req,res)=>{
-  
-    let userMsg = req.body;
     let userDet = req.header('Authorization');
-    
-    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-  
-    db.execute('INSERT INTO messages (id,name,message) VALUES(?,?,?)',[user.userId,user.userName,userMsg.msg]).then(resp =>{
-           
-        res.json({msg :'message inserted successfully'});
 
-    }).catch(err => {
-        res.status(500).json({msg :'something went wrong'})
-        console.log(err)
-    })
+    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
    
 
+    db.execute('SELECT * FROM messages').then(resp =>{
+        
+        res.json({msg:'data fetched successfully',data: resp[0],user:user.userId})
+    }).catch(err =>{
+        console.log(err)
+        res.json({msg:'error'})
+    })
 })
 
 module.exports = router;

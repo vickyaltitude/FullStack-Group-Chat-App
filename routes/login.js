@@ -18,7 +18,7 @@ router.post('/',(req,res)=>{
     
     db.execute('SELECT*FROM users WHERE email=?',[userEmail]).then(resp =>{
         let dataFromDB = resp[0]
-          console.log(resp[0])
+          
           if(dataFromDB.length == 0){
             res.status(404).json({msg:'user email not found'})
           }else if(dataFromDB.length){

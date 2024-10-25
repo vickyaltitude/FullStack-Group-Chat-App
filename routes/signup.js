@@ -21,8 +21,16 @@ console.log(receivedUserData)
             console.log(err)
         }else{
                 db.execute('INSERT INTO users (name,email,phone,password) VALUES(?,?,?,?)',[userName,userEmail,userPhone,hash]).then(resp =>{
-                  
-                        res.status(201).json({msg:'message inserted successfully'})
+                        
+                      let insertid = resp[0].insertId ;
+                      let message = `${userName} joins the chat`
+
+            db.execute('INSERT INTO messages (id,name,message) VALUES(?,?,?)',[insertid,userName,message]).then(resp =>{
+
+                res.status(201).json({msg:'message inserted successfully'})
+
+            }).catch(err => console.log(err))
+                       
                     
                     
                 }).catch(err => {

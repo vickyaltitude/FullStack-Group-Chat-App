@@ -20,7 +20,7 @@ logInForm.addEventListener('submit',async(e)=>{
           if(loginCheck.status){
              
              console.log(parsedResponse.msg)
-             localStorage.setItem('userId',parsedResponse.userId);
+             localStorage.setItem('userId',JSON.stringify(parsedResponse.userId));
              displayMessage(parsedResponse.msg)
             
           }else if(!loginCheck.status){
