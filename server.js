@@ -21,6 +21,7 @@ const signUp = require('./routes/signup');
 const logIn = require('./routes/login')
 const chatHome = require('./routes/chathome');
 const crudAPI = require('./routes/CRUDapi');
+const latestMsg = require('./routes/newmsgAPI');
 
 
 app.use('/',signUp);
@@ -30,6 +31,8 @@ app.use('/login',logIn);
 app.use('/chathome',chatHome);
 
 app.use('/chatmessages',crudAPI);
+
+app.use('/getlatest',latestMsg)
 
 
 
