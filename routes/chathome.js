@@ -18,7 +18,7 @@ router.post('/',(req,res)=>{
     let userDet = req.header('Authorization');
     
     let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-   console.log(8)
+   
     db.execute('INSERT INTO messages (user_id,name,message) VALUES(?,?,?)',[user.userId,user.userName,userMsg.msg]).then(resp =>{
            
         res.json({msg :'message inserted successfully'});

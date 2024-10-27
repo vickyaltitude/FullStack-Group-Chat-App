@@ -2,10 +2,92 @@ let userDetails = JSON.parse(localStorage.getItem('userId'));
 
 let showTexts = document.getElementById('chat-texts')
 const sendBtn = document.getElementById('send-btn');
+let create_form = document.getElementById('create-group-form');
+let membersList = document.getElementById('members')
 
+async function getusersList(){
+
+    membersList.innerHTML = '';
+
+    let getUsersName = await fetch(`http://localhost:7878/chatmessages/getusers`,{
+        method: 'get',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization' : userDetails.toString()
+        }
+    })
+    
+    let parsedUname = await getUsersName.json()
+        
+    let uName = parsedUname.data
+    
+       
+      for(let i = 0;i<uName.length;i++){
+
+        let newLabel = document.createElement('label')
+        newLabel.innerHTML = `<input type="checkbox" value="${uName[i].name}"> ${uName[i].name}`
+        membersList.appendChild(newLabel)
+
+      }
+
+ }
+
+getusersList();
+
+create_form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    let getGrpName = document.getElementById('group-name').value;
+    document.getElementById('create-group-form').style.display = 'none';
+
+
+    const checkedCheckboxes = document.querySelectorAll('#members input[type="checkbox"]:checked');
+    const selectedMembers = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+    document.querySelectorAll('#members input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('group-name').value = ''
+
+    let getData = await fetch('http://localhost:7878/newgroup', {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': userDetails.toString()
+        },
+        body: JSON.stringify({ getGrpName, selectedMembers })
+    });
+
+    let parsedresp = await getData.json();
+
+   if(!getData.status){
+            let duplicate_grp = document.getElementById('duplicate-msg');
+            duplicate_grp.style.display = 'block';
+
+            setTimeout(()=>{
+                duplicate_grp.style.display = 'none';
+            },2000)
+   }
+
+
+});
+
+
+document.getElementById('crt-grp-btn').addEventListener('click', function() {
+    document.getElementById('create-group-form').style.display = 'flex';
+});
+
+
+document.getElementById('cancel-btn').addEventListener('click', function() {
+    document.getElementById('create-group-form').style.display = 'none';
+    document.querySelectorAll('#members input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('group-name').value = ''
+});
 
 
 setInterval(async()=>{
+
 
     let getFromLocals = localStorage.getItem('dataFromDB');
         if(getFromLocals == undefined){
@@ -49,16 +131,41 @@ setInterval(async()=>{
                fetchData();
                
     }
-    
 
-        
+    
+    let grp_prsnt = await fetch('http://localhost:7878/chatmessages/groupsin',{
+
+        method: 'get',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization' : userDetails.toString()
+        }
+    })
+
+      let parsed_grp_details = await grp_prsnt.json();
+      showGroups(parsed_grp_details);
 
 },500)
 
 
+function showGroups(groups){
 
 
+    let group_head = document.getElementById('grp-lists-show');
+    group_head.innerHTML = ''
 
+      //console.log(groups.data)
+     for(let i = 0;i<groups.data.length;i++){
+        let a = document.createElement('a');
+        a.innerText = groups.data[i].group_name;
+        a.href = `/get/${groups.data[i].group_name}`
+        group_head.appendChild(a);
+        //console.log(a)
+     }
+    
+}
+
+ 
 
     function fetchData(){
     

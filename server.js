@@ -12,7 +12,7 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(express.json());
 
 app.use(cors({
-    origin: 'http://43.204.237.132',
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -22,6 +22,7 @@ const logIn = require('./routes/login')
 const chatHome = require('./routes/chathome');
 const crudAPI = require('./routes/CRUDapi');
 const latestMsg = require('./routes/newmsgAPI');
+const newGroup = require('./routes/newgroup')
 
 
 app.use('/',signUp);
@@ -32,7 +33,9 @@ app.use('/chathome',chatHome);
 
 app.use('/chatmessages',crudAPI);
 
-app.use('/getlatest',latestMsg)
+app.use('/getlatest',latestMsg);
+
+app.use('/newgroup',newGroup);
 
 
 

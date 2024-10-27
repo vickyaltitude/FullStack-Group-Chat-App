@@ -13,6 +13,53 @@ body{
     flex-direction: column;
 }
 
+#head h2{
+    font-size: 1.2rem;
+}
+
+#crt-grp-btn{
+    width: 40px;
+    border-radius: 15px;
+    background: whitesmoke;
+    color: #333333;
+    font-weight: bolder;
+    
+}
+
+#crt-grp-btn:hover{
+    background: rgb(219, 217, 217);
+}
+
+#grp-lists{
+    width:35%;
+    height: 100%;
+    background: #ffffff; /* Change to white for better contrast */
+    border-radius: 10px; /* Add rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Add box shadow */
+    padding: 10px; /* Add some padding */
+    max-height: 100vh; /* Set a maximum height for scrolling */
+    overflow-y: auto;
+}
+ul {
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+}
+
+#crt-grp{
+    color: whitesmoke;
+    background: #333333eb;
+    margin-top: 5px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+}
+
+#crt-grp-a{
+    color: whitesmoke;
+}
+
 #container{
     width: 95%;
     height: 100vh;
@@ -42,7 +89,7 @@ body{
     background: whitesmoke;
     font-size: 1.5rem;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
   
@@ -50,7 +97,7 @@ body{
 
 #chat-texts{
     height: 90%;
-    width: 50%;
+    width: 100%;
     padding-left: 10px;
     background: whitesmoke;
     border-radius: 10px; 
@@ -60,12 +107,18 @@ body{
 }
 #send-texts{
     display: flex;
+    width:100%;
+}
+#show-text-pg{
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    width: 100%;
 }
 
-
-input{
+#texts,#group-name{
     display: block;
-    width: 620px;
+    width: 1000px;
     height: 45px;
     border-radius: 15px;
     padding: 2px 12px;
@@ -97,6 +150,7 @@ button:hover{
     display: flex;
     justify-content: center;
     align-items: center;
+    
 }
 
 
@@ -107,17 +161,102 @@ a{
    
 }
 
+ul a {
+    text-decoration: none;
+    width: 100%;
+    height: 60px; /* Set a specific height */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center the text vertically */
+    margin-top: 20px;
+    background: #f0f0f0; /* Light gray background for list items */
+    color: #333; /* Darker text color */
+    border-radius: 8px; /* Rounded corners for list items */
+    transition: background 0.3s; /* Smooth transition for hover effect */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Box shadow for list items */
+}
+
+ul a:hover {
+    background: #e0e0e0; /* Darker gray on hover */
+    cursor: pointer; /* Change cursor to pointer */
+    text-decoration: none;
+}
 
 a:hover{
     color: #33333395;
    
 }
 
+#create-group-form{
+    position:absolute;
+    background: #333333;
+    border-radius: 12px;
+    width: 40%;
+    height: 60%;
+    display: none;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+
+}
+
+#group-name{
+    width: 400px;
+    
+}
+
+select{
+    width: 400px;
+    height: 50px;
+    font-size: 1.2rem;
+    border-radius: 15px;
+}
+
+#create-group-form h3{
+  font-size: 1.8rem;
+  color: whitesmoke;
+  padding: 10px;
+ 
+}
+
+#create-group-form label{
+    font-size: 1.2rem;
+    color: whitesmoke;
+    padding: 5px;
+   
+    border-radius: 12px;
+}
+#create-group-form button{
+    width: 400px;
+}
+#duplicate-msg{
+    display:none;
+}
+
+.checkbox-container {
+    max-height: 150px; /* Set a max height for the scrollable area */
+    overflow-y: auto; /* Enable vertical scrolling */
+    border: 1px solid #ccc; /* Optional: Add a border for better visibility */
+    padding: 10px; /* Optional: Add some padding */
+    margin-bottom: 15px; /* Optional: Space below the checkbox list */
+    max-width: 250px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-group label {
+    margin: 5px 0;
+ 
+}
+
 
 @media (max-width: 600px) {
    
 
-    input{
+    #texts{
         width: 100%;
         padding: 10px;
     }
@@ -137,6 +276,14 @@ a:hover{
         justify-content: space-between; /* Keep the input at the bottom */
         align-items: center;
     }
+    #crt-grp{
+        margin-top: 0px;
+    }
+    #grp-lists{
+        width:100%;
+        height: 100%;
+        background: #181818bd;
+    }
     
     #chat-texts {
         height: 95%; /* Set a specific height */
@@ -155,5 +302,7 @@ a:hover{
     word-wrap: break-word; /* Allow long words to break and wrap to the next line */
     white-space: normal;/* Add some margin between messages */
     }
+
+    
     
 }

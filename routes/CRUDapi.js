@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const db = require('../models/data');
 require('dotenv').config();
 
+
 router.get('/',(req,res)=>{
 
     let userDet = req.header('Authorization');
@@ -20,6 +21,36 @@ router.get('/',(req,res)=>{
         console.log(err)
         res.json({msg:'error'})
     })
+})
+
+router.get('/getusers',(req,res)=>{
+
+    db.execute('SELECT name FROM users').then(resp =>{
+        
+        res.json({msg:'data fetched successfully',data: resp[0]})
+    }).catch(err =>{
+        console.log(err)
+        res.json({msg:'error'})
+    })
+
+})
+
+router.get('/groupsin',(req,res)=>{
+
+    let userDet = req.header('Authorization');
+
+    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+    //console.log(user)
+    db.execute('SELECT * FROM group_membrs WHERE user_name = ?',[user.userName]).then(resp =>{
+
+
+        res.json({data:resp[0]});
+
+    }).catch(err =>{ 
+        //console.log(err)
+      res.status(500).json({msg:'something went wrong'})
+    })
+
 })
 
 module.exports = router;
