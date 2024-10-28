@@ -25,9 +25,75 @@
     <button id="create-btn">Create Group</button>
     <button id="cancel-btn">Cancel</button>
   </form>
+  <form id="add-user-to-group-form" >
+    <label>Select Member/s To Add:</label>
+    <div class="checkbox-container">
+        <div id="add-members-to-group" class="checkbox-group">
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          
+         
+        </div>
+    </div>
+
+    <button id="add-user-btn">Add User</button>
+    <button id="cancel-btn-au">Cancel</button>
+  </form>
+  <form id="remove-user-from-group-form" >
+    <label>Select Member/s To Remove:</label>
+    <div class="checkbox-container">
+        <div id="remove-members-from-group" class="checkbox-group">
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+          <label>
+            <input type="checkbox" value="user one">  user one
+          </label>
+         
+        </div>
+    </div>
+
+    <button id="add-user-btn">Remove User</button>
+    <button id="cancel-btn-ru">Cancel</button>
+  </form>
     <div id="container">
         <header id="head">
             <h2>VY-Chat</h2>
+            <h2 id="userWelcome"></h2>
       </header>
       
      <main id="chat-box">
@@ -35,12 +101,20 @@
         <p id="crt-grp"> Create your own group <button id="crt-grp-btn" type="button">+</button></p>
            
            <ul id="grp-lists-show">
-          
+                 
            </ul>
       </div>
      
     
       <div id="show-text-pg">
+        <div id="manage-group-head">
+
+          <h3 id="show-grp-name">Group Name :  </h3>
+          <div id=manage-group>
+            <button id="add-user">Add user</button><button id="remove-user">Remove User</button><button id="delete-group">Delete group</button>
+          </div>
+          
+        </div>
         <div id="chat-texts">
         </div>
         <p id="send-texts">

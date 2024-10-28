@@ -27,6 +27,8 @@ router.post('/',(req,res)=>{
     
     await db.execute(createTableQuery);
 
+   await db.execute(`INSERT INTO ${db.escapeId(incomeDat.getGrpName)} (user_id,name,message) VALUES(?,?,'Created this group')`,[user.userId,user.userName,])
+
         db.execute('SELECT * FROM `user_groups` WHERE group_name = ?',[incomeDat.getGrpName]).then(resp =>{
        
             incomeDat.selectedMembers.forEach(user =>{
@@ -44,7 +46,7 @@ router.post('/',(req,res)=>{
 
     }).catch(err => {
         
-        console.log(err.code)
+        console.log(err)
         res.status(404).json({msg:'duplicate entry'});
     
     })

@@ -22,7 +22,8 @@ const logIn = require('./routes/login')
 const chatHome = require('./routes/chathome');
 const crudAPI = require('./routes/CRUDapi');
 const latestMsg = require('./routes/newmsgAPI');
-const newGroup = require('./routes/newgroup')
+const newGroup = require('./routes/newgroup');
+const manageGroups = require('./routes/managegroups');
 
 
 app.use('/',signUp);
@@ -36,6 +37,8 @@ app.use('/chatmessages',crudAPI);
 app.use('/getlatest',latestMsg);
 
 app.use('/newgroup',newGroup);
+
+app.use('/managegroups',manageGroups);
 
 
 
