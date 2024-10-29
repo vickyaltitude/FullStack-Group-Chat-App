@@ -14,7 +14,7 @@ body{
 }
 
 #head h2{
-    font-size: 1.2rem;
+    font-size: 1.6rem;
 }
 
 #crt-grp-btn{
@@ -75,7 +75,7 @@ ul {
     height: 10%;
     background: #333333;
     color: #FFFFFF;
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -117,6 +117,7 @@ ul {
 #show-text-pg{
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     max-height: 90vh;
     width: 100%;
 }
@@ -130,6 +131,13 @@ ul {
 #manage-group-head{
     display: flex;
     justify-content: space-between;
+}
+
+#leave-frm-grp{
+    width: 200px;
+    display: none;
+    justify-content: center;
+    align-items: center;
 }
 
 #show-grp-name{

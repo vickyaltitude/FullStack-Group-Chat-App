@@ -53,9 +53,17 @@ remove_User_grp.addEventListener('click',async ()=>{
     let usersremParsed = await userstoremove.json();
     console.log(usersremParsed.usersToRem);
 
+    let createdGrp = localStorage.getItem('groupsCreated');
+    let userH = JSON.parse(localStorage.getItem('dataFromDB')).uName
+     console.log(userH)
     if(usersremParsed.usersToRem.length){
         for(let i = 0;i<usersremParsed.usersToRem.length;i++){
+           
+            if(createdGrp.indexOf(groups_users) !== -1 && usersremParsed.usersToRem[i] == userH){
 
+                 continue;
+
+            }
             let newLabelfu = document.createElement('label')
             newLabelfu.innerHTML = `<input type="checkbox" value="${usersremParsed.usersToRem[i]}"> ${usersremParsed.usersToRem[i]}`
             remUsersEle.appendChild(newLabelfu)
@@ -69,8 +77,36 @@ remove_User_grp.addEventListener('click',async ()=>{
     }
 })
 
-delete_grp.addEventListener('click',()=>{
-    
+delete_grp.addEventListener('click',async ()=>{
+    let confirmToDelete = confirm('Are you sure to delete this group?');
+
+    if(confirmToDelete){
+        let currentGrp = localStorage.getItem('reqgrp');
+        let deleteGrp = await fetch(`http://localhost:7878/managegroups/deletegrp?dltgrp=${currentGrp}`,{
+            method: 'get',
+            headers:{
+                'Content-Type':'application/json',
+                'Authorization' : userDetails.toString()
+            },
+        })
+
+        let respmsg = await deleteGrp.json()
+        console.log(respmsg)
+        if(deleteGrp.status){
+            localStorage.setItem('reqgrp','messages')
+            if(localStorage.getItem('reqgrp') == 'messages'){
+                document.getElementById('leave-frm-grp').style.display = 'none';
+            }else if(localStorage.getItem('reqgrp') !== 'messages'){
+                document.getElementById('leave-frm-grp').style.display = 'flex';
+            }
+           
+           document.getElementById('manage-group').style.display = 'none';
+        }
+      else{
+            console.log('something went wrong')
+        }
+
+    }
 })
 
 cancel_au.addEventListener('click',(e)=>{
@@ -80,6 +116,85 @@ cancel_au.addEventListener('click',(e)=>{
 cancel_ru.addEventListener('click',(e)=>{
     e.preventDefault()
     document.getElementById('remove-user-from-group-form').style.display = 'none';
+})
+
+document.getElementById('add-user-to-group-form').addEventListener('submit',async (e)=>{
+
+    const checkedUsers = document.querySelectorAll('#add-members-to-group input[type="checkbox"]:checked');
+    const selectedUsers = Array.from(checkedUsers).map(checkbox => checkbox.value);
+    let currentGrp = localStorage.getItem('reqgrp');
+
+    e.preventDefault();
+    let addUserToGrp = await fetch(`http://localhost:7878/managegroups/addusers?addto=${currentGrp}`,{
+        method: 'post',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization' : userDetails.toString()
+        },
+        body: JSON.stringify({usersLi: selectedUsers})
+    })
+
+    let respMsg = await addUserToGrp.json();
+    console.log(respMsg)
+    document.getElementById('add-user-to-group-form').style.display = 'none';
+    
+})
+
+
+document.getElementById('remove-user-from-group-form').addEventListener('submit',async (e)=>{
+
+    const checkedUsersRem = document.querySelectorAll('#remove-members-from-group input[type="checkbox"]:checked');
+    const selectedUsersRem = Array.from(checkedUsersRem).map(checkbox => checkbox.value);
+    let currentGrp = localStorage.getItem('reqgrp');
+
+    e.preventDefault();
+    let remUserToGrp = await fetch(`http://localhost:7878/managegroups/remusers?remfrm=${currentGrp}`,{
+        method: 'post',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization' : userDetails.toString()
+        },
+        body: JSON.stringify({usersLiRem: selectedUsersRem})
+    })
+
+    let respMsg = await remUserToGrp.json();
+    console.log(respMsg)
+    document.getElementById('remove-user-from-group-form').style.display = 'none';
+    
+})
+
+
+
+document.getElementById('leave-frm-grp').addEventListener('click',async ()=>{
+
+    let currentGrpL = localStorage.getItem('reqgrp');
+    let userL = JSON.parse(localStorage.getItem('dataFromDB'));
+    let userLeave = userL.uName;
+    let remUserToGrp = await fetch(`http://localhost:7878/managegroups/leaveusers?levfrm=${currentGrpL}`,{
+        method: 'post',
+        headers:{
+            'Content-Type':'application/json',
+            'Authorization' : userDetails.toString()
+        },
+        body: JSON.stringify({userL: userLeave})
+    })
+
+    console.log(remUserToGrp.status)
+
+     if(remUserToGrp.status){
+        localStorage.setItem('reqgrp','messages')
+       
+        if(localStorage.getItem('reqgrp') == 'messages'){
+            document.getElementById('leave-frm-grp').style.display = 'none';
+        }else if(localStorage.getItem('reqgrp') !== 'messages'){
+            document.getElementById('leave-frm-grp').style.display = 'flex';
+        }
+       
+       document.getElementById('manage-group').style.display = 'none';
+    }else{
+        console.log('something went wrong')
+    } 
+
 })
 
 async function getusersList(){
@@ -101,9 +216,15 @@ async function getusersList(){
        
       for(let i = 0;i<uName.length;i++){
 
+        if(uName[i].name == JSON.parse(localStorage.getItem('dataFromDB')).uName){
+            continue;
+        }else{
+
         let newLabel = document.createElement('label')
         newLabel.innerHTML = `<input type="checkbox" value="${uName[i].name}"> ${uName[i].name}`
         membersList.appendChild(newLabel)
+        }
+
 
       }
 
@@ -135,7 +256,14 @@ async function getGroups(){
 
     if(groups_C.indexOf(crnt_grp) !== -1){
        document.getElementById('manage-group').style.display = 'flex';
+       document.getElementById('leave-frm-grp').style.display = 'none';
     }else{
+        if(localStorage.getItem('reqgrp') == 'messages'){
+            document.getElementById('leave-frm-grp').style.display = 'none';
+        }else if(localStorage.getItem('reqgrp') !== 'messages'){
+            document.getElementById('leave-frm-grp').style.display = 'flex';
+        }
+       
        document.getElementById('manage-group').style.display = 'none';
     }
 
@@ -149,11 +277,13 @@ create_form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     let getGrpName = document.getElementById('group-name').value;
-    document.getElementById('create-group-form').style.display = 'none';
+   
 
 
     const checkedCheckboxes = document.querySelectorAll('#members input[type="checkbox"]:checked');
     const selectedMembers = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
+    selectedMembers.push(JSON.parse(localStorage.getItem('dataFromDB')).uName);
+    
     document.querySelectorAll('#members input[type="checkbox"]').forEach(checkbox => {
         checkbox.checked = false;
     });
@@ -169,18 +299,23 @@ create_form.addEventListener('submit', async (e) => {
     });
 
     let parsedresp = await getData.json();
-    getGroups();
+   
+  
+    if(parsedresp.msg == 'Duplicate entry'){
 
-   if(!getData.status){
-            let duplicate_grp = document.getElementById('duplicate-msg');
-            duplicate_grp.style.display = 'block';
+        let duplicate_grp = document.getElementById('duplicate-msg');
+        duplicate_grp.style.display = 'block';
 
-            setTimeout(()=>{
-                duplicate_grp.style.display = 'none';
-            },2000)
-   }
+        setTimeout(()=>{
+            duplicate_grp.style.display = 'none';
+        },2000)
+    }else{
+        document.getElementById('create-group-form').style.display = 'none';
+    }
+         
+   
 
-
+   getGroups();
 });
 
 
@@ -267,6 +402,7 @@ setInterval(async()=>{
     })
 
       let parsed_grp_details = await grp_prsnt.json();
+      //console.log(parsed_grp_details)
       showGroups(parsed_grp_details);
 
 },1000)
@@ -275,6 +411,7 @@ setInterval(async()=>{
 let btn_check = false;
 
 function showGroups(groups){
+
 
     if(btn_check){
         document.getElementById('messages').removeEventListener('click',handleClickGroup);
@@ -311,6 +448,8 @@ function showGroups(groups){
      }
      btn_check = true;
 }
+
+
 
  function handleClickGroup(e){
 

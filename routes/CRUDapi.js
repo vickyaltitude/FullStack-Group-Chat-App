@@ -70,10 +70,10 @@ router.get('/groupsin',(req,res)=>{
     let userDet = req.header('Authorization');
 
     let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-    //console.log(user)
+    
     db.execute('SELECT * FROM group_membrs WHERE user_name = ?',[user.userName]).then(resp =>{
 
-
+          
         res.json({data:resp[0]});
 
     }).catch(err =>{ 
