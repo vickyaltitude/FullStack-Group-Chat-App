@@ -6,41 +6,71 @@ const db = require('../models/data');
 const generatedToken = require('../util/jwt');
 
 
-router.get('/',(req,res)=>{
-    res.sendFile(path.join(__dirname,'..','public','login.html'));
-})
+module.exports = (io)=>{
 
-router.post('/',(req,res)=>{
+    router.get('/',(req,res)=>{
 
-    let receivedCred = req.body;
-    let userEmail = receivedCred.getEmail;
-    let userPassword = receivedCred.getPassword;
-    
-    db.execute('SELECT*FROM users WHERE email=?',[userEmail]).then(resp =>{
-        let dataFromDB = resp[0]
+        res.sendFile(path.join(__dirname,'..','public','login.html'));
+
+    })
+
+    io.on('connection',(socket)=>{
           
-          if(dataFromDB.length == 0){
-            res.status(404).json({msg:'user email not found'})
-          }else if(dataFromDB.length){
-            bcrypt.compare(userPassword,dataFromDB[0].password,(err,result)=>{
+              socket.on('userlogincheck',(data)=>{
 
-                if(err){
-                    res.status(500).json({msg:'something went wrong'})
-                    console.log('error')
-                }else if(result == true){
-                    console.log('success')
-                    res.status(200).json({msg:'user login successfull',userId: generatedToken.encryptuserid(dataFromDB[0].id,dataFromDB[0].name)})
-                }else{
-                    console.log('errormsg')
-                    res.status(401).json({msg:'entered password is incorrect'})
-                }
 
-            })
-          }
+                let userEmail = data.getEmail;
+                let userPassword = data.getPassword;
+                
+                db.execute('SELECT*FROM users WHERE email=?',[userEmail]).then(resp =>{
+                    let dataFromDB = resp[0]
+                      
+                      if(dataFromDB.length == 0){
 
-         
+                        socket.emit('emailnotfound',{msg:'user email not found'})
 
-    }).catch(err => console.log(err))
-})
+                      }else if(dataFromDB.length){
 
-module.exports = router;
+                        bcrypt.compare(userPassword,dataFromDB[0].password,(err,result)=>{
+            
+                            if(err){
+
+                                socket.emit('bcrypterror',{msg:'something went wrong'})
+                                console.log('error')
+
+                            }else if(result == true){
+
+                                console.log('success')
+
+                                socket.emit('userloginsuccessfull',{msg:'user login successfull',userId: generatedToken.encryptuserid(dataFromDB[0].id,dataFromDB[0].name)})
+
+                            }else{
+
+                                console.log('errormsg')
+                                socket.emit('passwordincorrecterror',{msg:'entered password is incorrect'})
+
+                            }
+            
+                        })
+                      }
+            
+                     
+            
+                }).catch(err => {
+                     
+                    console.log(err)
+                    socket.emit('dberror',{msg:'db login error while checking credential'});
+
+                })
+
+
+
+              })
+
+
+    })
+    
+
+    return router
+}
+

@@ -6,26 +6,42 @@ const bcrypt = require('bcrypt');
 const db = require('../models/data');
 require('dotenv').config();
 
+module.exports = (io) =>{
 
-router.get('/',(req,res)=>{
 
-    let userDet = req.header('Authorization');
 
-    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-   
-    let reqgrp = req.query.reqgrp
-     let id = req.query.lastMsg;
+    io.on('connection',(socket)=>{
 
-    db.execute(`SELECT * FROM ${db.escapeId(reqgrp)} WHERE id > ?`,[Number(id)]).then(resp =>{
-    
-      
-        res.json({data:resp[0],id:user.userId,name:user.userName})
-     
+        socket.on('getlatestmsg',(data)=>{
 
-    }).catch(err =>{
-        console.log(err)
+            let userDet = data.jwtToken
+
+            let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+           
+            let reqgrp = data.reqgrp
+
+              console.log(reqgrp)
+            db.execute(`SELECT * FROM ${db.escapeId(reqgrp)}`).then(resp =>{
+            
+              
+                socket.emit('latestmsgfetchsuccess',{latestdata:resp[0],id:user.userId,name:user.userName})
+             
+        
+            }).catch(err =>{
+
+                console.log(err)
+                socket.emit('latestmsgfetchfailure',{msg:'latest msg fetch failure'})
+
+            })
+
+        })
+
+
     })
-    
-})
 
-module.exports = router
+         
+
+
+    return router
+
+}

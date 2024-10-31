@@ -1,4 +1,11 @@
-let userDetails = JSON.parse(localStorage.getItem('userId'));
+const socket = io('http://localhost:7878');
+
+socket.on('connect', () => {
+
+    console.log('Connected to the server');
+
+});
+let userDetails = JSON.parse(localStorage.getItem('userId')).toString();
 
 let showTexts = document.getElementById('chat-texts')
 const sendBtn = document.getElementById('send-btn');
@@ -8,24 +15,127 @@ let add_User_grp = document.getElementById('add-user');
 let remove_User_grp = document.getElementById('remove-user');
 let delete_grp = document.getElementById('delete-group');
 let cancel_au = document.getElementById('cancel-btn-au');
-let cancel_ru = document.getElementById('cancel-btn-ru')
+let cancel_ru = document.getElementById('cancel-btn-ru');
 
 
-add_User_grp.addEventListener('click',async ()=>{
+/* Page when loads */
+
+window.onload = ()=>{
+  getEveryMsg()
+  socket.emit('getgroupslist',{jwtToken:userDetails.toString()})
+  socket.emit('groupsin',{jwtToken:userDetails})
+
+}
+
+
+function getEveryMsg(){
+
+    if(localStorage.getItem('reqgrp') == undefined){
+        localStorage.setItem('reqgrp','messages')
+        reqgrp = 'messages'
+    }else{
+     reqgrp = localStorage.getItem('reqgrp');
+    }
+
+    showTexts.innerHTML = '';
+         
+        
+      socket.emit('chatmessagesgetmessages',{reqgrp:reqgrp,jwtToken:userDetails});
+
+ 
+ }
+
+
+
+
+
+ socket.on('usermemberin',(data)=>{
+
+    showGroups(data);
+
+     
+    let crnt_grp = localStorage.getItem('reqgrp');
+    let userMemArr = data.grpdata.map(list => list.group_name)
+     console.log(userMemArr)
+    if(userMemArr.indexOf(crnt_grp) == -1){
+        localStorage.setItem('reqgrp','messages')
+    }
+
+})
+
+socket.on('errorwhilefetchusersgrps',(data)=>{
+
+    console.log('error while fetching details of users');
+
+})
+
+ 
+
+
+
+ socket.on('messagesgotfromDB',(data)=>{
     
+   console.log(data)
+    localStorage.setItem('dataFromDB',JSON.stringify(data));
+ 
+        fetchData()
+
+})
+
+
+socket.on('erroringettingmsg',(data)=>{
+
+    console.log('error while getting messages from db')
+
+})
+
+add_User_grp.addEventListener('click', ()=>{
+
+
     let addUsersEle = document.getElementById('add-members-to-group')
     addUsersEle.innerHTML = ''
     document.getElementById('add-user-to-group-form').style.display = 'flex';
     let groups_users = localStorage.getItem('reqgrp');
-    let userstoadd = await fetch(`http://localhost:7878/managegroups/userstoadd?gusers=${groups_users}`);
+    
+    socket.emit('userstoadd',{gusers:groups_users})
+    
 
-    let usersParsed = await userstoadd.json();
 
-    if(usersParsed.usersToAdd.length){
-        for(let i = 0;i<usersParsed.usersToAdd.length;i++){
+})
+
+remove_User_grp.addEventListener('click',()=>{
+
+    let remUsersEle = document.getElementById('remove-members-from-group')
+   remUsersEle.innerHTML = ''
+
+   document.getElementById('remove-user-from-group-form').style.display = 'flex';
+   let groups_users = localStorage.getItem('reqgrp');
+   socket.emit('userstoremove',{gusers:groups_users})
+ 
+})
+
+delete_grp.addEventListener('click', ()=>{
+
+    let confirmToDelete = confirm('Are you sure to delete this group?');
+
+    if(confirmToDelete){
+
+        let currentGrp = localStorage.getItem('reqgrp');
+
+        socket.emit('deletegrp',{dltgrp:currentGrp});
+
+    }
+})
+
+
+socket.on('userfetchedsuccessfully',(data)=>{
+    
+    let addUsersEle = document.getElementById('add-members-to-group')
+    if(data.usersToAdd.length){
+        for(let i = 0;i<data.usersToAdd.length;i++){
 
             let newLabelfu = document.createElement('label')
-            newLabelfu.innerHTML = `<input type="checkbox" value="${usersParsed.usersToAdd[i]}"> ${usersParsed.usersToAdd[i]}`
+            newLabelfu.innerHTML = `<input type="checkbox" value="${data.usersToAdd[i]}"> ${data.usersToAdd[i]}`
             addUsersEle.appendChild(newLabelfu)
     
           }
@@ -36,36 +146,27 @@ add_User_grp.addEventListener('click',async ()=>{
          addUsersEle.appendChild(alreadyPresent)
     }
 
-  
-
-
 })
 
-remove_User_grp.addEventListener('click',async ()=>{
 
-     let remUsersEle = document.getElementById('remove-members-from-group')
-    remUsersEle.innerHTML = ''
+socket.on('usertoremsuccess',(data)=>{
 
-    document.getElementById('remove-user-from-group-form').style.display = 'flex';
-    let groups_users = localStorage.getItem('reqgrp');
-    let userstoremove = await fetch(`http://localhost:7878/managegroups/userstoremove?gusers=${groups_users}`);
 
-    let usersremParsed = await userstoremove.json();
-    console.log(usersremParsed.usersToRem);
-
+    let remUsersEle = document.getElementById('remove-members-from-group')
+    let groups_users = localStorage.getItem('reqgrp')
     let createdGrp = localStorage.getItem('groupsCreated');
     let userH = JSON.parse(localStorage.getItem('dataFromDB')).uName
      console.log(userH)
-    if(usersremParsed.usersToRem.length){
-        for(let i = 0;i<usersremParsed.usersToRem.length;i++){
+    if(data.usersToRem.length){
+        for(let i = 0;i<data.usersToRem.length;i++){
            
-            if(createdGrp.indexOf(groups_users) !== -1 && usersremParsed.usersToRem[i] == userH){
+            if(createdGrp.indexOf(groups_users) !== -1 && data.usersToRem[i] == userH){
 
                  continue;
 
             }
             let newLabelfu = document.createElement('label')
-            newLabelfu.innerHTML = `<input type="checkbox" value="${usersremParsed.usersToRem[i]}"> ${usersremParsed.usersToRem[i]}`
+            newLabelfu.innerHTML = `<input type="checkbox" value="${data.usersToRem[i]}"> ${data.usersToRem[i]}`
             remUsersEle.appendChild(newLabelfu)
     
           }
@@ -75,44 +176,42 @@ remove_User_grp.addEventListener('click',async ()=>{
          alreadyRem.style.color = 'whitesmoke';
          remUsersEle.appendChild(alreadyRem)
     }
+
 })
 
-delete_grp.addEventListener('click',async ()=>{
-    let confirmToDelete = confirm('Are you sure to delete this group?');
 
-    if(confirmToDelete){
-        let currentGrp = localStorage.getItem('reqgrp');
-        let deleteGrp = await fetch(`http://localhost:7878/managegroups/deletegrp?dltgrp=${currentGrp}`,{
-            method: 'get',
-            headers:{
-                'Content-Type':'application/json',
-                'Authorization' : userDetails.toString()
-            },
-        })
 
-        let respmsg = await deleteGrp.json()
-        console.log(respmsg)
-        if(deleteGrp.status){
-            localStorage.setItem('reqgrp','messages')
-            if(localStorage.getItem('reqgrp') == 'messages'){
-                document.getElementById('leave-frm-grp').style.display = 'none';
-            }else if(localStorage.getItem('reqgrp') !== 'messages'){
-                document.getElementById('leave-frm-grp').style.display = 'flex';
-            }
-           
-           document.getElementById('manage-group').style.display = 'none';
-        }
-      else{
-            console.log('something went wrong')
-        }
+socket.on('grpdeletionsuccess',(data)=>{
 
+   
+
+    localStorage.setItem('reqgrp','messages')
+    getEveryMsg()
+    socket.emit('groupsin',{jwtToken:userDetails})
+    
+    if(localStorage.getItem('reqgrp') == 'messages'){
+        document.getElementById('leave-frm-grp').style.display = 'none';
+    }else if(localStorage.getItem('reqgrp') !== 'messages'){
+        document.getElementById('leave-frm-grp').style.display = 'flex';
     }
+   
+   document.getElementById('manage-group').style.display = 'none';
+
+ 
+
+})
+
+socket.on('errwhiledeletinggrp',(data)=>{
+
+    console.log('error while deleting the group')
+
 })
 
 cancel_au.addEventListener('click',(e)=>{
     e.preventDefault()
     document.getElementById('add-user-to-group-form').style.display = 'none';
 })
+
 cancel_ru.addEventListener('click',(e)=>{
     e.preventDefault()
     document.getElementById('remove-user-from-group-form').style.display = 'none';
@@ -125,160 +224,151 @@ document.getElementById('add-user-to-group-form').addEventListener('submit',asyn
     let currentGrp = localStorage.getItem('reqgrp');
 
     e.preventDefault();
-    let addUserToGrp = await fetch(`http://localhost:7878/managegroups/addusers?addto=${currentGrp}`,{
-        method: 'post',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        },
-        body: JSON.stringify({usersLi: selectedUsers})
-    })
+    socket.emit('addusers',{addto:currentGrp,usersLi: selectedUsers})
 
-    let respMsg = await addUserToGrp.json();
-    console.log(respMsg)
     document.getElementById('add-user-to-group-form').style.display = 'none';
     
 })
 
+socket.on('invalidlist',(data)=>{
+    console.log('users list is invalid')
+})
 
-document.getElementById('remove-user-from-group-form').addEventListener('submit',async (e)=>{
+socket.on('usergrpinsertionsuccessfull',(data)=>{
+    console.log('user insertion succesful to grpmembrs')
+})
+
+socket.on('errorwhileinsertingindbgrpmembrs',(data)=>{
+    console.log('error while inserting users to grpmembers')
+})
+
+document.getElementById('remove-user-from-group-form').addEventListener('submit',(e)=>{
 
     const checkedUsersRem = document.querySelectorAll('#remove-members-from-group input[type="checkbox"]:checked');
     const selectedUsersRem = Array.from(checkedUsersRem).map(checkbox => checkbox.value);
     let currentGrp = localStorage.getItem('reqgrp');
 
     e.preventDefault();
-    let remUserToGrp = await fetch(`http://localhost:7878/managegroups/remusers?remfrm=${currentGrp}`,{
-        method: 'post',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        },
-        body: JSON.stringify({usersLiRem: selectedUsersRem})
-    })
 
-    let respMsg = await remUserToGrp.json();
-    console.log(respMsg)
+    socket.emit('remusers',{remfrm:currentGrp,usersLiRem:selectedUsersRem});
+
+
     document.getElementById('remove-user-from-group-form').style.display = 'none';
     
 })
 
 
+socket.on('userremsuccess',(data)=>{
+    console.log('users rem from group')
+})
 
-document.getElementById('leave-frm-grp').addEventListener('click',async ()=>{
+
+document.getElementById('leave-frm-grp').addEventListener('click',()=>{
 
     let currentGrpL = localStorage.getItem('reqgrp');
     let userL = JSON.parse(localStorage.getItem('dataFromDB'));
     let userLeave = userL.uName;
-    let remUserToGrp = await fetch(`http://localhost:7878/managegroups/leaveusers?levfrm=${currentGrpL}`,{
-        method: 'post',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        },
-        body: JSON.stringify({userL: userLeave})
-    })
+    socket.emit('leaveusers',{levfrm:currentGrpL,userL:userLeave});
+  
+})
 
-    console.log(remUserToGrp.status)
+socket.on('userleftsuccess',(data)=>{
 
-     if(remUserToGrp.status){
-        localStorage.setItem('reqgrp','messages')
+    localStorage.setItem('reqgrp','messages')
        
-        if(localStorage.getItem('reqgrp') == 'messages'){
-            document.getElementById('leave-frm-grp').style.display = 'none';
-        }else if(localStorage.getItem('reqgrp') !== 'messages'){
-            document.getElementById('leave-frm-grp').style.display = 'flex';
-        }
-       
-       document.getElementById('manage-group').style.display = 'none';
-    }else{
-        console.log('something went wrong')
-    } 
+    if(localStorage.getItem('reqgrp') == 'messages'){
+        document.getElementById('leave-frm-grp').style.display = 'none';
+    }else if(localStorage.getItem('reqgrp') !== 'messages'){
+        document.getElementById('leave-frm-grp').style.display = 'flex';
+    }
+   
+   document.getElementById('manage-group').style.display = 'none';
+
+   socket.emit('groupsin',{jwtToken:userDetails})
 
 })
 
-async function getusersList(){
+ function getusersList(){
 
     membersList.innerHTML = '';
 
-    let getUsersName = await fetch(`http://localhost:7878/chatmessages/getusers`,{
-        method: 'get',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        }
-    })
+    socket.emit('getusers',{jwtToken:userDetails})
     
-    let parsedUname = await getUsersName.json()
-        
-    let uName = parsedUname.data
-    
-       
-      for(let i = 0;i<uName.length;i++){
-
-        if(uName[i].name == JSON.parse(localStorage.getItem('dataFromDB')).uName){
-            continue;
-        }else{
-
-        let newLabel = document.createElement('label')
-        newLabel.innerHTML = `<input type="checkbox" value="${uName[i].name}"> ${uName[i].name}`
-        membersList.appendChild(newLabel)
-        }
-
-
-      }
 
  }
 
-getusersList();
 
 
-async function getGroups(){
+socket.on('userslistfetchsuccess',(data)=>{
 
-    let getGroupsList = await fetch(`http://localhost:7878/chatmessages/getgroupslist`,{
-        method: 'get',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
+   console.log(data)
+    for(let i = 0;i<data.Userdata.length;i++){
+
+        let newLabel = document.createElement('label')
+        newLabel.innerHTML = `<input type="checkbox" value="${data.Userdata[i].name}"> ${data.Userdata[i].name}`
+        membersList.appendChild(newLabel)
+
+
         }
-    })
 
+      
+
+})
+
+socket.on('errowhilefetchusers',(data)=>{
+    console.log('error while fetching users')
+})
+
+function getGroups(){
+    
+    socket.emit('getgroupslist',{jwtToken:userDetails.toString()})
    
 
-    let parsedGroupsList = await getGroupsList.json();
-  
-    let groupsArr = parsedGroupsList.groups_created.map(group => group.group_name);
+}
 
+
+socket.on('usergrpsfetchsuccess',(data)=>{
+
+    let groupsArr = data.groups_created.map(group => group.group_name);
+    
     localStorage.setItem('groupsCreated',JSON.stringify(groupsArr));
-
-    let groups_C = JSON.parse(localStorage.getItem('groupsCreated'));
+    
     let crnt_grp = localStorage.getItem('reqgrp');
+    
+    if(groupsArr.indexOf(crnt_grp) !== -1){
 
-    if(groups_C.indexOf(crnt_grp) !== -1){
        document.getElementById('manage-group').style.display = 'flex';
        document.getElementById('leave-frm-grp').style.display = 'none';
-    }else{
+    }
+    
+    if(groupsArr.indexOf(crnt_grp) == -1){
+
         if(localStorage.getItem('reqgrp') == 'messages'){
+           
             document.getElementById('leave-frm-grp').style.display = 'none';
+
         }else if(localStorage.getItem('reqgrp') !== 'messages'){
+           
             document.getElementById('leave-frm-grp').style.display = 'flex';
         }
        
        document.getElementById('manage-group').style.display = 'none';
     }
 
+})
 
 
-}
+socket.on('errorwhilefetchinggrpslist',(data)=>{
 
-getGroups();
+    console.log('error while fetching groups list');
+
+})
 
 create_form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     let getGrpName = document.getElementById('group-name').value;
    
-
 
     const checkedCheckboxes = document.querySelectorAll('#members input[type="checkbox"]:checked');
     const selectedMembers = Array.from(checkedCheckboxes).map(checkbox => checkbox.value);
@@ -289,38 +379,44 @@ create_form.addEventListener('submit', async (e) => {
     });
     document.getElementById('group-name').value = ''
 
-    let getData = await fetch('http://localhost:7878/newgroup', {
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': userDetails.toString()
-        },
-        body: JSON.stringify({ getGrpName, selectedMembers })
-    });
 
-    let parsedresp = await getData.json();
-   
-  
-    if(parsedresp.msg == 'Duplicate entry'){
+     socket.emit('createnewgroup',{getGrpName,selectedMembers,jwtToken:userDetails.toString()})
 
-        let duplicate_grp = document.getElementById('duplicate-msg');
-        duplicate_grp.style.display = 'block';
-
-        setTimeout(()=>{
-            duplicate_grp.style.display = 'none';
-        },2000)
-    }else{
-        document.getElementById('create-group-form').style.display = 'none';
-    }
-         
    
 
-   getGroups();
 });
 
 
+socket.on('groupcreatedsuccessfully',(data)=>{
+
+    document.getElementById('create-group-form').style.display = 'none';
+    
+    socket.emit('groupsin',{jwtToken:userDetails})
+
+})
+
+socket.on('groupalreadyexist',(data)=>{
+
+    let duplicate_grp = document.getElementById('duplicate-msg');
+    duplicate_grp.style.display = 'block';
+
+    setTimeout(()=>{
+        duplicate_grp.style.display = 'none';
+    },2000)
+
+})
+
+socket.on('somethingwentwrongwhilecreatinggroup',(data)=>{
+
+    console.log('somethingwentwrongwhilecreatinggroup')
+
+})
+
 document.getElementById('crt-grp-btn').addEventListener('click', function() {
+   
     document.getElementById('create-group-form').style.display = 'flex';
+    getusersList();
+  
 });
 
 
@@ -333,84 +429,36 @@ document.getElementById('cancel-btn').addEventListener('click', function() {
 });
 
 
-setInterval(async()=>{
 
-   if(localStorage.getItem('reqgrp') == undefined){
-       reqgrp = 'messages'
-   }else{
-    reqgrp = localStorage.getItem('reqgrp');
-   }
+socket.on('latestmsgfetchsuccess',(data)=>{
 
-
-    let getFromLocals = localStorage.getItem('dataFromDB');
-        if(getFromLocals == undefined){
-       
-            let getData = await fetch(`http://localhost:7878/chatmessages?reqgrp=${reqgrp}`,{
-                method: 'get',
-                headers:{
-                    'Content-Type':'application/json',
-                    'Authorization' : userDetails.toString()
-                }
-            })
-            
-            let parsed = await getData.json();
-            localStorage.setItem('dataFromDB',JSON.stringify(parsed));
-         
-                fetchData()
-              
-        
+    let dataFromLocal = JSON.parse(localStorage.getItem('dataFromDB'));
+    dataFromLocal.user = data.id;
+    dataFromLocal.uName = data.name;
     
-    }else{
-      
-        let dataFromLocal = JSON.parse(getFromLocals);
-        if(dataFromLocal.data.length){
-         
-            let lastMsg = dataFromLocal.data[dataFromLocal.data.length-1].id || 0;
-        let getData = await fetch(`http://localhost:7878/getlatest?lastMsg=${lastMsg}&reqgrp=${reqgrp}`,{
-            method: 'get',
-            headers:{
-                'Content-Type':'application/json',
-                'Authorization' : userDetails.toString()
-            }
-        })
-        let parsedLocal = await getData.json();
-        dataFromLocal.user = parsedLocal.id;
-        dataFromLocal.uName = parsedLocal.name;
+   
+        dataFromLocal.Msgdata = data.latestdata
+        localStorage.setItem('dataFromDB',JSON.stringify(dataFromLocal));
+ 
+           fetchData();
 
-        if(parsedLocal.data.length == 0){
+})
 
-            localStorage.setItem('dataFromDB',JSON.stringify(dataFromLocal));
-        }else{
-            dataFromLocal.data = [...dataFromLocal.data,...parsedLocal.data]
-            localStorage.setItem('dataFromDB',JSON.stringify(dataFromLocal));
-        }
-     
-               fetchData();
-        }
-        
-               
-    }
+socket.on('latestmsgfetchfailure',(data)=>{
 
-    
-    let grp_prsnt = await fetch('http://localhost:7878/chatmessages/groupsin',{
+    console.log('failedtofetchlatest msg',data)
+})
 
-        method: 'get',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        }
-    })
 
-      let parsed_grp_details = await grp_prsnt.json();
-      //console.log(parsed_grp_details)
-      showGroups(parsed_grp_details);
-
-},1000)
 
 
 let btn_check = false;
 
 function showGroups(groups){
+
+   
+
+
 
 
     if(btn_check){
@@ -435,18 +483,20 @@ function showGroups(groups){
     group_head.appendChild(global_btn)
 
       //console.log(groups.data)
-     for(let i = 0;i<groups.data.length;i++){
+     for(let i = 0;i<groups.grpdata.length;i++){
         let grp_btn = document.createElement('button');
         grp_btn.type = 'button'
-        grp_btn.innerText = groups.data[i].group_name;
+        grp_btn.innerText = groups.grpdata[i].group_name;
         grp_btn.className = 'grp-btn'
-        grp_btn.id = `${groups.data[i].group_name}`
+        grp_btn.id = `${groups.grpdata[i].group_name}`
         grp_btn.addEventListener('click',handleClickGroup);
        
         group_head.appendChild(grp_btn);
         //console.log(a)
      }
      btn_check = true;
+
+     socket.emit('chatmessagesgetmessages',{reqgrp:reqgrp,jwtToken:userDetails});
 }
 
 
@@ -454,8 +504,7 @@ function showGroups(groups){
  function handleClickGroup(e){
 
      localStorage.setItem('reqgrp',e.target.id);
-     localStorage.removeItem('dataFromDB');
-
+    
      let groups_C = JSON.parse(localStorage.getItem('groupsCreated'));
 
      if(groups_C.indexOf(e.target.id) !== -1){
@@ -464,7 +513,9 @@ function showGroups(groups){
         document.getElementById('manage-group').style.display = 'none';
      }
 
-     getGroups();
+     let crnt_rq = localStorage.getItem('reqgrp')
+     socket.emit('getlatestmsg',{jwtToken:userDetails.toString(),reqgrp:crnt_rq})
+     socket.emit('getgroupslist',{jwtToken:userDetails.toString()})
 
  }
  
@@ -478,10 +529,15 @@ function showGroups(groups){
         let dataFromLocal = JSON.parse(getFromLocalst);
         grpName.innerText = `Group Name :  ${grpNameLS == 'messages' ? 'Global' : grpNameLS}`
         welcomeUser.innerText = ` Welcome ${dataFromLocal.uName}`;
-        let data = dataFromLocal.data;
+        let data = dataFromLocal.Msgdata;
         showTexts.innerHTML = '';
         
         for (let i = 0; i < data.length; i++) {
+
+            let messageContainer = document.createElement('div');
+            messageContainer.style.display = 'flex';
+            messageContainer.style.justifyContent = data[i].user_id === dataFromLocal.user ? 'flex-end' : 'flex-start';
+            messageContainer.style.margin = '5px 0'; // Adjust margin as needed
             let p = document.createElement('p');
             
             p.style.padding = '10px';
@@ -490,11 +546,12 @@ function showGroups(groups){
             p.style.fontSize = '1.4rem';
             p.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
             p.style.transition = 'background-color 0.3s ease';
+            p.style.transition = 'background-color 0.3s ease';
             
-            p.style.backgroundColor = i % 2 === 0 ? '#eaeaea' : '#f9f9f9';
+            p.style.backgroundColor = data[i].user_id === dataFromLocal.user ? '#f9f9f9' : '#eaeaea';
             
             let userName = document.createElement('span');
-            userName.innerText = data[i].user_id === dataFromLocal.user ? `${data[i].name}(you)` : data[i].name;
+            userName.innerText = data[i].user_id === dataFromLocal.user ? `you` : data[i].name;
             userName.style.fontWeight = data[i].user_id === dataFromLocal.user ? 'bold' : 'normal';
             userName.style.color = '#555'; 
             
@@ -516,7 +573,10 @@ function showGroups(groups){
             p.appendChild(msgDate);
             
             
-            showTexts.appendChild(p);
+            messageContainer.appendChild(p);
+        
+        // Append the message container to the showTexts element
+        showTexts.appendChild(messageContainer);
            
         }
         
@@ -525,29 +585,29 @@ function showGroups(groups){
    
    
 
-sendBtn.addEventListener('click',async (e)=>{
+sendBtn.addEventListener('click',(e)=>{
 
     e.preventDefault();
     let insert_grp = localStorage.getItem('reqgrp')
 
     let textVal = document.getElementById('texts').value;
-    let insertMsg = await fetch(`http://localhost:7878/chathome?insertgrp=${insert_grp}`,{
-        method: 'post',
-        headers:{
-            'Content-Type':'application/json',
-            'Authorization' : userDetails.toString()
-        },
-        body: JSON.stringify({msg:textVal})
-    })
-
-
-    let parsedReceived = await insertMsg.json();
-    console.log(parsedReceived)
+ 
+    socket.emit('insertmsgtogrp',{msg:textVal,insertgrp:insert_grp,jwtToken:userDetails.toString()});
    
     document.getElementById('texts').value = '';
   
 })
 
+socket.on('messageinsertionsuccessful',(data)=>{
 
+    getEveryMsg();
+     
+
+})
+
+socket.on('msginsertionfailed',(data)=>{
+
+        console.log(data)
+})
 
 

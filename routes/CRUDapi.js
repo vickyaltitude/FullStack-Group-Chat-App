@@ -7,80 +7,95 @@ const db = require('../models/data');
 require('dotenv').config();
 
 
-router.get('/', (req,res)=>{
+module.exports = (io) =>{
+  
+    io.on('connection',(socket)=>{
 
-   let reqgrp = req.query.reqgrp
-    let userDet = req.header('Authorization');
 
-    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-   
+        socket.on('chatmessagesgetmessages',(data)=>{
 
-    db.execute(`SELECT * FROM ${db.escapeId(reqgrp)}`).then( async resp =>{
+                    let reqgrp = data.reqgrp
+                    let userDet = data.jwtToken;
+                    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+                    console.log(user)
 
+            db.execute(`SELECT * FROM ${db.escapeId(reqgrp)}`).then( async resp =>{
+
+                
+                socket.emit('messagesgotfromDB',{msg:'data fetched successfully',Msgdata: resp[0],user:user.userId,uName:user.userName})
+
+            }).catch(err =>{
+
+                console.log(err)
+
+                socket.emit('erroringettingmsg',{msg:'error'})
+            })
+
+        })
+
+        socket.on('getgroupslist',async (data)=>{
+
+            let userDet = data.jwtToken;
+
+            let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+      
+            try{
         
-        res.json({msg:'data fetched successfully',data: resp[0],user:user.userId,uName:user.userName})
-    }).catch(err =>{
-        console.log(err)
-        res.json({msg:'error'})
-    })
-})
-
-
-
-router.get('/getgroupslist',async (req,res)=>{
-
-    let userDet = req.header('Authorization');
-
-    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-
-    try{
-
-        let groupsCreated = await db.execute('SELECT * FROM user_groups WHERE created_by =?',[user.userId]);
-
-        res.json({groups_created:groupsCreated[0]})
-
-    }catch(err){
-
-        console.log(err)
-        res.status(500).json({msg:'something went wrong'})
-    }
-
-    
-
-     
-
-})
-
-
-
-router.get('/getusers',(req,res)=>{
-
-    db.execute('SELECT name FROM users').then(resp =>{
+                let groupsCreated = await db.execute('SELECT * FROM user_groups WHERE created_by =?',[user.userId]);
         
-        res.json({msg:'user fetched successfully',data: resp[0]})
-    }).catch(err =>{
-        console.log(err)
-        res.json({msg:'error'})
+                socket.emit('usergrpsfetchsuccess',{groups_created:groupsCreated[0]})
+        
+            }catch(err){
+        
+                console.log(err)
+                socket.emit('errorwhilefetchinggrpslist',{msg:'something went wrong'})
+            }
+        
+
+        })
+
+
+       socket.on('getusers',(data)=>{
+
+                   let userDet = data.jwtToken
+
+                    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+        
+                db.execute('SELECT name FROM users WHERE name != ?',[user.userName]).then(resp =>{
+                    
+                    socket.emit('userslistfetchsuccess',{msg:'user fetched successfully',Userdata: resp[0]})
+                }).catch(err =>{
+                    console.log(err)
+                    socket.emit('errowhilefetchusers',{msg:'error fetching users'})
+                })
+
+       })
+
+
+       socket.on('groupsin',(data)=>{
+
+                        
+                    let userDet = data.jwtToken
+
+                    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+                    
+                    db.execute('SELECT * FROM group_membrs WHERE user_name = ?',[user.userName]).then(resp =>{
+
+                        
+                        socket.emit('usermemberin',{grpdata:resp[0]});
+
+                    }).catch(err =>{ 
+                        //console.log(err)
+                        socket.emit('errorwhilefetchusersgrps',{msg:'something went wrong'})
+                    })
+
+
+       })
+
+
     })
 
-})
+    return router
 
-router.get('/groupsin',(req,res)=>{
+}
 
-    let userDet = req.header('Authorization');
-
-    let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
-    
-    db.execute('SELECT * FROM group_membrs WHERE user_name = ?',[user.userName]).then(resp =>{
-
-          
-        res.json({data:resp[0]});
-
-    }).catch(err =>{ 
-        //console.log(err)
-      res.status(500).json({msg:'something went wrong'})
-    })
-
-})
-
-module.exports = router;
