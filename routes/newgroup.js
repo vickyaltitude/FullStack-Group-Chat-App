@@ -43,7 +43,7 @@ module.exports = (io) =>{
                     await db.execute('INSERT INTO `group_membrs` (user_name, group_name) VALUES(?, ?)', [member, groupName]);
                 }
         
-               socket.emit('groupcreatedsuccessfully',{ msg: 'New group created successfully' });
+               socket.emit('groupcreatedsuccessfully',{ msg: 'New group created successfully',grpName:data.getGrpName });
         
             } catch (err) {
                 console.error(err);

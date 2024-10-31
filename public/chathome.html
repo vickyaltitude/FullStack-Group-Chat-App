@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="chathome.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Group-Chat-App</title>
 </head>
 <body>
@@ -58,7 +59,7 @@
       
      <main id="chat-box">
       <div id="grp-lists">
-        <p id="crt-grp"> Create your own group <button id="crt-grp-btn" type="button">+</button></p>
+        <p id="crt-grp"> Create your own group <button id="crt-grp-btn" type="button"><i class="fa-solid fa-plus"></i></button></p>
            
            <ul id="grp-lists-show">
                  
@@ -80,6 +81,7 @@
         </div>
         <p id="send-texts">
           <input type="text" id="texts" required>
+          
           <button id='send-btn' type="button">Send</button>
         </p>
       
@@ -92,6 +94,7 @@
        <h4>VY-Chat&copy;2024</h4>
      </footer>
     </div>
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="chathome.js"></script>
 </body>

@@ -39,9 +39,7 @@ function getEveryMsg(){
 
     showTexts.innerHTML = '';
          
-        
       socket.emit('chatmessagesgetmessages',{reqgrp:reqgrp,jwtToken:userDetails});
-
  
  }
 
@@ -285,6 +283,7 @@ socket.on('userleftsuccess',(data)=>{
    document.getElementById('manage-group').style.display = 'none';
 
    socket.emit('groupsin',{jwtToken:userDetails})
+   getEveryMsg()
 
 })
 
@@ -390,8 +389,14 @@ create_form.addEventListener('submit', async (e) => {
 socket.on('groupcreatedsuccessfully',(data)=>{
 
     document.getElementById('create-group-form').style.display = 'none';
-    
+
+    localStorage.setItem('reqgrp',data.grpName)
     socket.emit('groupsin',{jwtToken:userDetails})
+    socket.emit('getgroupslist',{jwtToken:userDetails.toString()})
+    getEveryMsg()
+    
+
+
 
 })
 
@@ -575,13 +580,18 @@ function showGroups(groups){
             
             messageContainer.appendChild(p);
         
-        // Append the message container to the showTexts element
+        
         showTexts.appendChild(messageContainer);
            
         }
+
+        scrollToBottom()
         
     }
     
+    function scrollToBottom() {
+        showTexts.scrollTop = showTexts.scrollHeight; 
+    }
    
    
 
@@ -609,5 +619,6 @@ socket.on('msginsertionfailed',(data)=>{
 
         console.log(data)
 })
+
 
 

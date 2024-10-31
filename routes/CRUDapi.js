@@ -60,6 +60,7 @@ module.exports = (io) =>{
                    let userDet = data.jwtToken
 
                     let user = jwt.verify(userDet,process.env.JWT_TOKEN_SECRET);
+
         
                 db.execute('SELECT name FROM users WHERE name != ?',[user.userName]).then(resp =>{
                     
